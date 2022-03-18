@@ -6,7 +6,7 @@ inputs:
     required: false
     description: "Name of crate of interest. Default is root package."
   pwd:
-    default: "./"
+    default: ${{ github.workspace }}
     required: false
     description: "Current working directory."
   tag-to-version:
