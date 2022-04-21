@@ -142,7 +142,12 @@ async function get_crate(name, pwd, impl) {
 async function get_last_tag(pwd) {
 	const opt = { cwd: pwd };
 
-	const { err, stdout, stderr } = await exec("git describe --abbrev=0", opt);
+	try {
+		const { err, stdout, stderr } = await exec("git describe --abbrev=0", opt);
+	} catch (error) {
+		warning(error.message);
+		return undefined;
+	}
 	if (err) {
 		warning(err);
 		return undefined;
