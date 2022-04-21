@@ -143,7 +143,10 @@ async function get_last_tag(pwd) {
 	const opt = { cwd: pwd };
 
 	const { err, stdout, stderr } = await exec("git describe --abbrev=0", opt);
-	if (err) { return fail(err); }
+	if (err) {
+		warning(err);
+		return undefined;
+	}
 	let result = stdout.trim();
 	return result;
 }
