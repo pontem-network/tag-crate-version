@@ -154,14 +154,18 @@ async function get_last_tag(pwd) {
 	// try #1
 	try {
 		const { _err, _stdout, _stderr } = await exec("git describe --abbrev=0 --tag", opt);
-		(err, stdout, stderr) = (_err, _stdout, _stderr);
+		err = _err;
+		stdout = _stdout;
+		stderr = _stderr;
 	} catch (error) {
 		notice(error.message);
 
 		// try #2
 		try {
 			const { _err, _stdout, _stderr } = await exec("git describe --abbrev=0", opt);
-			(err, stdout, stderr) = (_err, _stdout, _stderr);
+			err = _err;
+			stdout = _stdout;
+			stderr = _stderr;
 		} catch (error) {
 			notice(error.message);
 			return undefined;
