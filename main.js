@@ -149,35 +149,23 @@ async function get_last_tag(pwd) {
 		console.warn(error.message);
 	}
 
-	let err, stdout, stderr;
 
-	// try #1
-	try {
-		const { _err, _stdout, _stderr } = await exec("git describe --abbrev=0 --tag", opt);
-		err = _err;
-		stdout = _stdout;
-		stderr = _stderr;
-	} catch (error) {
-		notice(error.message);
-
-		// try #2
+	function gitDescribe(extraArgs = "") {
 		try {
-			const { _err, _stdout, _stderr } = await exec("git describe --abbrev=0", opt);
-			err = _err;
-			stdout = _stdout;
-			stderr = _stderr;
+			const { err, stdout, stderr } = await exec("git describe --abbrev=0 " + extraArgs, opt);
 		} catch (error) {
 			notice(error.message);
 			return undefined;
 		}
+		if (err) {
+			warning(err);
+			return undefined;
+		}
+		let result = stdout.trim();
+		return result;
 	}
 
-	if (err) {
-		warning(err);
-		return undefined;
-	}
-	let result = stdout.trim();
-	return result;
+	return (gitDescribe("--tag") || gitDescribe());
 }
 
 async function push_tag(pwd, tag, annotation = undefined) {
