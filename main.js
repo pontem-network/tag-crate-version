@@ -90,6 +90,7 @@ async function run(opts, impl) {
 			await push_tag(opts.pwd, new_tag).then(() => set_github_action_output({ success: true })).catch(notice_or_error);
 	}
 	else {
+		notice("Can't determine latest tag via `git describe`, so just trying to push new tag anyway");
 		await push_tag(opts.pwd, new_tag).then(() => set_github_action_output({ success: true })).catch(notice_or_error);
 	}
 }
@@ -142,18 +143,30 @@ async function get_crate(name, pwd, impl) {
 async function get_last_tag(pwd) {
 	const opt = { cwd: pwd };
 
+	// prefetch
 	try {
-		const { err, stdout, stderr } = await exec("git describe --abbrev=0", opt);
+		await exec("git fetch --tags --prune-tags", opt);
 	} catch (error) {
-		warning(error.message);
-		return undefined;
+		console.warn(error.message);
 	}
-	if (err) {
-		warning(err);
-		return undefined;
+
+
+	async function gitDescribe(extraArgs = "") {
+		try {
+			const { err, stdout, stderr } = await exec("git describe --abbrev=0 " + extraArgs, opt);
+			if (err) {
+				notice(err);
+				return undefined;
+			}
+			let result = stdout.trim();
+			return result;
+		} catch (error) {
+			notice(error.message);
+			return undefined;
+		}
 	}
-	let result = stdout.trim();
-	return result;
+
+	return (await gitDescribe("--tag") || await gitDescribe());
 }
 
 async function push_tag(pwd, tag, annotation = undefined) {
