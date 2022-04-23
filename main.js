@@ -150,7 +150,7 @@ async function get_last_tag(pwd) {
 	}
 
 
-	function gitDescribe(extraArgs = "") {
+	async function gitDescribe(extraArgs = "") {
 		try {
 			const { err, stdout, stderr } = await exec("git describe --abbrev=0 " + extraArgs, opt);
 		} catch (error) {
@@ -165,7 +165,7 @@ async function get_last_tag(pwd) {
 		return result;
 	}
 
-	return (gitDescribe("--tag") || gitDescribe());
+	return (await gitDescribe("--tag") || await gitDescribe());
 }
 
 async function push_tag(pwd, tag, annotation = undefined) {
