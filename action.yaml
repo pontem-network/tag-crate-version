@@ -17,6 +17,10 @@ inputs:
     default: "v$1"
     required: false
     description: "Temptate for the tag, where `$1` is a placeholder for the version."
+  dry-run:
+    default: "false"
+    required: false
+    description: If `true`, new tag will not be pushed to git.
   token:
     required: false
     description: "GITHUB_TOKEN"
@@ -57,6 +61,7 @@ runs:
         INP_PWD: ${{ inputs.pwd }}
         INP_TAG_TO_VERSION: ${{ inputs.tag-to-version }}
         INP_VERSION_TO_TAG: ${{ inputs.version-to-tag }}
+        INP_DRY_RUN: ${{ inputs.dry-run }}
         INP_GITHUB_TOKEN: ${{ inputs.token }}
 
 branding:

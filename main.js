@@ -87,11 +87,11 @@ async function run(opts, impl) {
 		set_github_action_output({ previous: last_ver });
 
 		if (last_ver != crate.version)
-			await push_tag(opts.pwd, new_tag).then(() => set_github_action_output({ success: true })).catch(notice_or_error);
+			await push_tag(opts.pwd, new_tag, opts.dry_run).then(() => set_github_action_output({ success: true })).catch(notice_or_error);
 	}
 	else {
 		notice("Can't determine latest tag via `git describe`, so just trying to push new tag anyway");
-		await push_tag(opts.pwd, new_tag).then(() => set_github_action_output({ success: true })).catch(notice_or_error);
+		await push_tag(opts.pwd, new_tag, opts.dry_run).then(() => set_github_action_output({ success: true })).catch(notice_or_error);
 	}
 }
 
@@ -105,6 +105,7 @@ function get_github_action_input() {
 			pwd: core.getInput('pwd', optional) || process.env.INP_PWD,
 			tag_to_version: core.getInput('tag-to-version', optional) || process.env.INP_TAG_TO_VERSION,
 			version_to_tag: core.getInput('version-to-tag', optional) || process.env.INP_VERSION_TO_TAG,
+			dry_run: core.getInput('dry-run', optional) || process.env.INP_DRY_RUN,
 			github_token: core.getInput('token', optional) || process.env.INP_GITHUB_TOKEN,
 		}
 	} catch (error) {
@@ -169,15 +170,17 @@ async function get_last_tag(pwd) {
 	return (await gitDescribe("--tag") || await gitDescribe());
 }
 
-async function push_tag(pwd, tag, annotation = undefined) {
+async function push_tag(pwd, tag, dry_run) {
 	const opt = { cwd: pwd };
 	{
 		const { err } = await exec(`git tag "${tag}"`, opt);
 		if (err) { return fail(err); }
 	}
-	{
+	if (!dry_run || dry_run + "" == "false") {
 		const { err } = await exec("git push --tags", opt);
 		if (err) { return fail(err); }
+	} else {
+		warning("Input argument `dry-run` passed as `" + dry_run + "`, so tag not pushed to git.");
 	}
 }
 
